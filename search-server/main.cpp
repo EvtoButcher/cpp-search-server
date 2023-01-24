@@ -283,7 +283,7 @@ void AssertImpl(bool value, const string& expr_str, const string& file, const st
 #define ASSERT_HINT(expr, hint) AssertImpl(!!(expr), #expr, __FILE__, __FUNCTION__, __LINE__, (hint))
 
 
-// Поддержка стоп-слов. Стоп-слова исключаются из текста документов.
+// РџРѕРґРґРµСЂР¶РєР° СЃС‚РѕРї-СЃР»РѕРІ. РЎС‚РѕРї-СЃР»РѕРІР° РёСЃРєР»СЋС‡Р°СЋС‚СЃСЏ РёР· С‚РµРєСЃС‚Р° РґРѕРєСѓРјРµРЅС‚РѕРІ.
 void TestExcludeStopWordsFromAddedDocumentContent() {
     const int doc_id = 42;
     const string content = "cat in the city"s;
@@ -305,7 +305,7 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
     }
 }
 
-//Добавление документов.Добавленный документ должен находиться по поисковому запросу, который содержит слова из документа.
+//Р”РѕР±Р°РІР»РµРЅРёРµ РґРѕРєСѓРјРµРЅС‚РѕРІ.Р”РѕР±Р°РІР»РµРЅРЅС‹Р№ РґРѕРєСѓРјРµРЅС‚ РґРѕР»Р¶РµРЅ РЅР°С…РѕРґРёС‚СЊСЃСЏ РїРѕ РїРѕРёСЃРєРѕРІРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ, РєРѕС‚РѕСЂС‹Р№ СЃРѕРґРµСЂР¶РёС‚ СЃР»РѕРІР° РёР· РґРѕРєСѓРјРµРЅС‚Р°.
 void TestAddDocument()
 {
     const int doc_id = 42;
@@ -323,7 +323,7 @@ void TestAddDocument()
 }
 
 
-//Поддержка минус-слов. Документы, содержащие минус-слова из поискового запроса, не должны включаться в результаты поиска.
+//РџРѕРґРґРµСЂР¶РєР° РјРёРЅСѓСЃ-СЃР»РѕРІ. Р”РѕРєСѓРјРµРЅС‚С‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РјРёРЅСѓСЃ-СЃР»РѕРІР° РёР· РїРѕРёСЃРєРѕРІРѕРіРѕ Р·Р°РїСЂРѕСЃР°, РЅРµ РґРѕР»Р¶РЅС‹ РІРєР»СЋС‡Р°С‚СЊСЃСЏ РІ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРѕРёСЃРєР°.
 void TestMinusWords()
 {
     const int doc_id = 42;
@@ -338,8 +338,8 @@ void TestMinusWords()
 
 }
 
-//Соответствие документов поисковому запросу.При этом должны быть возвращены все слова из поискового запроса,
-//присутствующие в документе.Если есть соответствие хотя бы по одному минус - слову, должен возвращаться пустой список слов.
+//РЎРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РґРѕРєСѓРјРµРЅС‚РѕРІ РїРѕРёСЃРєРѕРІРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ.РџСЂРё СЌС‚РѕРј РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РІРѕР·РІСЂР°С‰РµРЅС‹ РІСЃРµ СЃР»РѕРІР° РёР· РїРѕРёСЃРєРѕРІРѕРіРѕ Р·Р°РїСЂРѕСЃР°,
+//РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‰РёРµ РІ РґРѕРєСѓРјРµРЅС‚Рµ.Р•СЃР»Рё РµСЃС‚СЊ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ С…РѕС‚СЏ Р±С‹ РїРѕ РѕРґРЅРѕРјСѓ РјРёРЅСѓСЃ - СЃР»РѕРІСѓ, РґРѕР»Р¶РµРЅ РІРѕР·РІСЂР°С‰Р°С‚СЊСЃСЏ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє СЃР»РѕРІ.
 void TestMatchedDocuments()
 {
     {
@@ -348,7 +348,7 @@ void TestMatchedDocuments()
         const int document_count = server.GetDocumentCount();
         for (int document_id = 0; document_id < document_count; ++document_id)
         {
-            //сверяем запрос с документом
+            //СЃРІРµСЂСЏРµРј Р·Р°РїСЂРѕСЃ СЃ РґРѕРєСѓРјРµРЅС‚РѕРј
             const auto& [words, status] = server.MatchDocument("fluffy cat"s, document_id);
             ASSERT_EQUAL(words.size(), 1);
             ASSERT_EQUAL(document_id, 0);
@@ -363,7 +363,7 @@ void TestMatchedDocuments()
         const int document_count = server.GetDocumentCount();
         for (int document_id = 0; document_id < document_count; ++document_id)
         {
-            //сверяем запрос с документом, но накладываем еще стоп слово
+            //СЃРІРµСЂСЏРµРј Р·Р°РїСЂРѕСЃ СЃ РґРѕРєСѓРјРµРЅС‚РѕРј, РЅРѕ РЅР°РєР»Р°РґС‹РІР°РµРј РµС‰Рµ СЃС‚РѕРї СЃР»РѕРІРѕ
             const auto& [words, status] = server.MatchDocument("fluffy cat"s, document_id);
             ASSERT_EQUAL(words.size(), 0);
             ASSERT_EQUAL(document_id, 0);
@@ -377,7 +377,7 @@ void TestMatchedDocuments()
         const int document_count = server.GetDocumentCount();
         for (int document_id = 0; document_id < document_count; ++document_id)
         {
-            //сверяем запрос с документом, но добавляем минус слово в запрос
+            //СЃРІРµСЂСЏРµРј Р·Р°РїСЂРѕСЃ СЃ РґРѕРєСѓРјРµРЅС‚РѕРј, РЅРѕ РґРѕР±Р°РІР»СЏРµРј РјРёРЅСѓСЃ СЃР»РѕРІРѕ РІ Р·Р°РїСЂРѕСЃ
             const auto& [words, status] = server.MatchDocument("fluffy -cat"s, document_id);
             ASSERT_EQUAL(words.size(), 0);
             ASSERT_EQUAL(document_id, 0);
@@ -386,7 +386,7 @@ void TestMatchedDocuments()
     }
 }
 
-//Сортировка найденных документов по релевантности
+//РЎРѕСЂС‚РёСЂРѕРІРєР° РЅР°Р№РґРµРЅРЅС‹С… РґРѕРєСѓРјРµРЅС‚РѕРІ РїРѕ СЂРµР»РµРІР°РЅС‚РЅРѕСЃС‚Рё
 void RelevanceRest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
@@ -404,7 +404,7 @@ void RelevanceRest() {
     }
 }
 
-//Вычисление рейтинга документов. Рейтинг добавленного документа равен среднему арифметическому оценок документа.
+//Р’С‹С‡РёСЃР»РµРЅРёРµ СЂРµР№С‚РёРЅРіР° РґРѕРєСѓРјРµРЅС‚РѕРІ. Р РµР№С‚РёРЅРі РґРѕР±Р°РІР»РµРЅРЅРѕРіРѕ РґРѕРєСѓРјРµРЅС‚Р° СЂР°РІРµРЅ СЃСЂРµРґРЅРµРјСѓ Р°СЂРёС„РјРµС‚РёС‡РµСЃРєРѕРјСѓ РѕС†РµРЅРѕРє РґРѕРєСѓРјРµРЅС‚Р°.
 void RaitingTest() {
     SearchServer server;
     vector<int> RaitingDoc1 = { 8, -3 };
@@ -418,7 +418,7 @@ void RaitingTest() {
     ASSERT_EQUAL(documents[1].rating, (accumulate(RaitingDoc1.begin(), RaitingDoc1.end(), 0) / static_cast<int>(RaitingDoc1.size())));
 }
 
-//Фильтрация результатов поиска с использованием предиката, задаваемого пользователем.
+//Р¤РёР»СЊС‚СЂР°С†РёСЏ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РїРѕРёСЃРєР° СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј РїСЂРµРґРёРєР°С‚Р°, Р·Р°РґР°РІР°РµРјРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј.
 void UserPredTest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
@@ -433,7 +433,7 @@ void UserPredTest() {
     }
 }
 
-// Поиск документов, имеющих заданный статус.
+// РџРѕРёСЃРє РґРѕРєСѓРјРµРЅС‚РѕРІ, РёРјРµСЋС‰РёС… Р·Р°РґР°РЅРЅС‹Р№ СЃС‚Р°С‚СѓСЃ.
 void UserStatusTest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
@@ -448,7 +448,7 @@ void UserStatusTest() {
 
 #define RUN_TEST(func) func(); 
 
-// Функция TestSearchServer является точкой входа для запуска тестов
+// Р¤СѓРЅРєС†РёСЏ TestSearchServer СЏРІР»СЏРµС‚СЃСЏ С‚РѕС‡РєРѕР№ РІС…РѕРґР° РґР»СЏ Р·Р°РїСѓСЃРєР° С‚РµСЃС‚РѕРІ
 void TestSearchServer() {
     RUN_TEST(TestExcludeStopWordsFromAddedDocumentContent);
     RUN_TEST(TestAddDocument);
@@ -460,7 +460,7 @@ void TestSearchServer() {
     RUN_TEST(UserPredTest);
 }
 
-// --------- Окончание модульных тестов поисковой системы -----------
+// --------- РћРєРѕРЅС‡Р°РЅРёРµ РјРѕРґСѓР»СЊРЅС‹С… С‚РµСЃС‚РѕРІ РїРѕРёСЃРєРѕРІРѕР№ СЃРёСЃС‚РµРјС‹ -----------
 
 int main() {
     TestSearchServer();
