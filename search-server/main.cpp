@@ -386,7 +386,7 @@ void TestMatchedDocuments()
     }
 }
 
-//Сортировка найденных документов по релевантности. 
+//Сортировка найденных документов по релевантности
 void RelevanceRest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
