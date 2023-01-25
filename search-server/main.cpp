@@ -308,17 +308,36 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
 //Добавление документов.Добавленный документ должен находиться по поисковому запросу, который содержит слова из документа.
 void TestAddDocument()
 {
-    const int doc_id = 42;
-    const string content = "cat in the city"s;
-    const vector<int> ratings = { 1, 2, 3 };
+    vector<int> DocId = { 0,1,2,3 };
 
     {
         SearchServer server;
-        server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-        const auto found_docs = server.FindTopDocuments("cat in the city"s);
+        server.AddDocument(DocId[0], "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
+        server.AddDocument(DocId[1], "fluffy cat fluffy tail"s, DocumentStatus::ACTUAL, { 7, 2, 7 });
+        server.AddDocument(DocId[2], "soigne dog expressive eyes"s, DocumentStatus::ACTUAL, { 5, -12, 2 });
+        server.AddDocument(DocId[3], "soigne starling eugeny"s, DocumentStatus::BANNED, { 9 });
+
+        const auto& found_docs = server.FindTopDocuments("fluffy soigne cat"s);
+
+        ASSERT_EQUAL(found_docs.size(), 3);
+
+        for (const Document& doc : found_docs) {
+            ASSERT(count(DocId.begin(), DocId.end(), doc.id));
+        }
+    }
+
+    {
+        SearchServer server;
+        server.AddDocument(DocId[0], "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
+        server.AddDocument(DocId[1], "fluffy cat fluffy tail"s, DocumentStatus::ACTUAL, { 7, 2, 7 });
+        server.AddDocument(DocId[2], "soigne dog expressive eyes"s, DocumentStatus::ACTUAL, { 5, -12, 2 });
+        server.AddDocument(DocId[3], "soigne starling eugeny"s, DocumentStatus::BANNED, { 9 });
+
+        const auto& found_docs = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::BANNED);
+
         ASSERT_EQUAL(found_docs.size(), 1);
         const Document& doc0 = found_docs[0];
-        ASSERT_EQUAL(doc0.id, doc_id);
+        ASSERT_EQUAL(doc0.id, DocId[3]);
     }
 }
 
@@ -386,7 +405,7 @@ void TestMatchedDocuments()
     }
 }
 
-//Сортировка найденных документов по релевантности
+//Сортировка найденных документов по релевантности. 
 void RelevanceRest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
@@ -437,13 +456,82 @@ void UserPredTest() {
 void UserStatusTest() {
     SearchServer server;
     server.AddDocument(0, "white cat and fancy collar"s, DocumentStatus::ACTUAL, { 8, -3 });
-    server.AddDocument(1, "fluffy cat fluffy tail"s, DocumentStatus::ACTUAL, { 7, 2, 7 });
-    server.AddDocument(2, "soigne dog expressive eyes"s, DocumentStatus::ACTUAL, { 5, -12, 2 });
+    server.AddDocument(1, "fluffy cat fluffy tail"s, DocumentStatus::IRRELEVANT, { 7, 2, 7 });
+    server.AddDocument(2, "soigne dog expressive eyes"s, DocumentStatus::REMOVED, { 5, -12, 2 });
     server.AddDocument(3, "soigne starling eugeny"s, DocumentStatus::BANNED, { 9 });
+    {
+        const auto documents = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::ACTUAL);
+        ASSERT_EQUAL(documents.size(), 1);
+    }
 
-    const auto documents = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::BANNED);
+    {
+        const auto documents = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::IRRELEVANT);
+        ASSERT_EQUAL(documents.size(), 1);
+    }
 
-    ASSERT_EQUAL(documents.size(), 1);
+    {
+        const auto documents = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::REMOVED);
+        ASSERT_EQUAL(documents.size(), 1);
+    }
+
+    {
+        const auto documents = server.FindTopDocuments("fluffy soigne cat"s, DocumentStatus::BANNED);
+        ASSERT_EQUAL(documents.size(), 1);
+    }
+}
+
+// Корректность рассчёта релевантности документов.
+void RelevanceTest() {
+    vector<int> DocId = { 0,1,2,3 };
+    vector<string> DocText = { "white cat and fancy collar"s ,
+                               "fluffy cat fluffy tail"s ,
+                               "soigne dog expressive eyes"s ,
+                               "soigne starling eugeny"s };
+
+    SearchServer server;
+
+    server.AddDocument(DocId[0], DocText[0], DocumentStatus::ACTUAL, { 8, -3 });
+    server.AddDocument(DocId[1], DocText[1], DocumentStatus::ACTUAL, { 7, 2, 7 });
+    server.AddDocument(DocId[2], DocText[2], DocumentStatus::ACTUAL, { 5, -12, 2 });
+    server.AddDocument(DocId[3], DocText[3], DocumentStatus::ACTUAL, { 9 });
+
+    const auto documents = server.FindTopDocuments("fluffy soigne cat"s);
+
+    //Рассчёт релевантности документов для сравнения с рассчётом из класса
+    map<string, map<int, double>> word_to_document_freqs_;
+    vector<string> PlusWords = { "fluffy"s, "soigne"s, "cat"s };
+    vector<string> DocWords;
+    map<int, double> document_to_relevance;
+
+    for (int i = 0; i < static_cast<int>(DocText.size()); i++) {
+        DocWords = SplitIntoWords(DocText[i]);
+        const double inv_word_count = 1.0 / DocWords.size();
+        for (int j = 0; j < static_cast<int>(DocWords.size()); j++) {
+            word_to_document_freqs_[DocWords[j]][DocId[i]] += inv_word_count;
+        }
+    }
+
+    for (const string& word : PlusWords) {
+        if (word_to_document_freqs_.count(word) == 0) {
+            continue;
+        }
+        const double IDF = log(DocId.size() * 1.0 / word_to_document_freqs_.at(word).size());
+        for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) {
+
+            document_to_relevance[document_id] += TF * IDF;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    //проверим сходство рассчётных значений и значений полученных  в классе
+
+    for (const auto& [id, rel] : document_to_relevance) {
+        for (const Document& doc : documents) {
+            if (doc.id == id) {
+                ASSERT((abs(rel - doc.relevance) < MAX_DEVIATION));
+            }
+        }
+    }
 }
 
 #define RUN_TEST(func) func(); 
@@ -458,6 +546,7 @@ void TestSearchServer() {
     RUN_TEST(RaitingTest);
     RUN_TEST(UserStatusTest);
     RUN_TEST(UserPredTest);
+    RUN_TEST(RelevanceTest);
 }
 
 // --------- Окончание модульных тестов поисковой системы -----------
