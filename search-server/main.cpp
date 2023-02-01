@@ -191,7 +191,7 @@ public:
         if (index < 0 || index > index_id.size()) {
             throw out_of_range("incorrect index"s);
         }
-        return index_id.at(index);
+        return index_id[index - 1];
     }
 
 private:
@@ -364,7 +364,7 @@ int main() {
     {
         cout << "invalid_argument in ID: "s << e.what() << endl;
     }
-    try//////////////////
+    try
     {
         SearchServer serch_server("и на в"s);
         serch_server.AddDocument(1, "пушистый пёс и модный ошейник"s, DocumentStatus::ACTUAL, { 1, 2 });
@@ -390,8 +390,8 @@ int main() {
     {
         SearchServer serch_server("и на в"s);
         serch_server.AddDocument(1, "пушистый пёс и модный ошейник"s, DocumentStatus::ACTUAL, { 1, 2 });
-        serch_server.AddDocument(2, "пушистый кот"s, DocumentStatus::ACTUAL, { 1, 2 });
-        serch_server.GetDocumentId(-21);
+        serch_server.AddDocument(3, "пушистый кот"s, DocumentStatus::ACTUAL, { 1, 2 });
+        cout << serch_server.GetDocumentId(3) << endl;
     }
     catch (const out_of_range& e)
     {
@@ -410,3 +410,4 @@ int main() {
     {
         cout << "invalid_argument in FindTopDocuments: "s << e.what() << endl;
     }
+}
