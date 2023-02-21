@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include "string_processing.h"
 #include "document.h"
-#include "read_input_finctions.h"
+#include "read_input_functions.h"
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 

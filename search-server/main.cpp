@@ -1,5 +1,5 @@
-#include "SearchServer.h"
-#include "requst_queue.h"
+#include "search_server.h"
+#include "request_queue.h"
 #include "paginator.h"
 using namespace std;
 
