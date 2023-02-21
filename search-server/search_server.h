@@ -10,6 +10,7 @@
 #include "read_input_functions.h"
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
+constexpr auto MAX_ERROR = 1e-6;
 
 class SearchServer
 {
@@ -94,7 +95,7 @@ inline std::vector<Document> SearchServer::FindTopDocuments(const std::string& r
 
     sort(matched_documents.begin(), matched_documents.end(),
         [](const Document& lhs, const Document& rhs) {
-            if (std::abs(lhs.relevance - rhs.relevance) < 1e-6) {
+            if (std::abs(lhs.relevance - rhs.relevance) < MAX_ERROR) {
                 return lhs.rating > rhs.rating;
             }
             else {

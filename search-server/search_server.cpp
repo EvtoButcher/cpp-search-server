@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numeric>
 #include "search_server.h"
 using namespace std;
 
@@ -102,11 +103,8 @@ int SearchServer::ComputeAverageRating(const vector<int>& ratings)
 	if (ratings.empty()) {
 		return 0;
 	}
-	int rating_sum = 0;
-	for (const int rating : ratings) {
-		rating_sum += rating;
-	}
-	return rating_sum / static_cast<int>(ratings.size());
+	
+	return accumulate(ratings.begin(), ratings.end(), 0) / static_cast<int>(ratings.size());
 }
 
 SearchServer::QueryWord SearchServer::ParseQueryWord(const string& text) const
