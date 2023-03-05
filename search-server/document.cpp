@@ -2,7 +2,7 @@
 using namespace std;
 
 Document::Document(int id, double relevance, int rating)
-	: id(id)
+    : id(id)
     , relevance(relevance)
     , rating(rating) {
 }

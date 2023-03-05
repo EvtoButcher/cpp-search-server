@@ -5,7 +5,7 @@ using namespace std;
 
 SearchServer::SearchServer(const string& stop_words_text)
 	: SearchServer(
-		SplitIntoWords(stop_words_text))  // Invoke delegating constructor from string container
+		SplitIntoWords(stop_words_text)) 
 {
 }
 
@@ -19,9 +19,11 @@ void SearchServer::AddDocument(int document_id, const string& document, Document
 	const double inv_word_count = 1.0 / words.size();
 	for (const string& word : words) {
 		word_to_document_freqs_[word][document_id] += inv_word_count;
+		word_freqs_in_document_[document_id][word] += inv_word_count;
 	}
+
 	documents_.emplace(document_id, DocumentData{ ComputeAverageRating(ratings), status });
-	document_ids_.push_back(document_id);
+	document_ids_.insert(document_id);
 }
 
 vector<Document> SearchServer::FindTopDocuments(const string& raw_query, DocumentStatus status) const
@@ -42,10 +44,6 @@ size_t SearchServer::GetDocumentCount() const
 	return documents_.size();
 }
 
-int SearchServer::GetDocumentId(int index) const
-{
-	return document_ids_.at(index);
-}
 
 tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& raw_query, int document_id) const
 {
@@ -71,6 +69,40 @@ tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& 
 	}
 	return { matched_words, documents_.at(document_id).status };
 }
+
+std::set<int>::const_iterator SearchServer::begin()
+{
+	return document_ids_.begin();
+}
+
+std::set<int>::const_iterator SearchServer::end()
+{
+	return document_ids_.end();
+}
+
+const std::map<std::string, double>& SearchServer::GetWordFrequencies(int document_id) const
+{
+	static map<std::string, double> word_freqs;
+	
+	if (word_freqs_in_document_.find(document_id) != word_freqs_in_document_.end()) {
+	
+		word_freqs = word_freqs_in_document_.at(document_id);	
+	}
+	return word_freqs;
+}
+
+void SearchServer::RemoveDocument(int document_id)
+{
+	if (document_ids_.find(document_id) != document_ids_.end()) {
+		document_ids_.erase(document_id);
+		documents_.erase(document_id);
+		for (const auto& [word, _] : word_freqs_in_document_.at(document_id)) {
+			word_to_document_freqs_.at(word).erase(document_id);
+		}
+		word_freqs_in_document_.erase(document_id);
+	}
+}
+
 
 bool SearchServer::IsStopWord(const string& word) const
 {
@@ -103,7 +135,7 @@ int SearchServer::ComputeAverageRating(const vector<int>& ratings)
 	if (ratings.empty()) {
 		return 0;
 	}
-	
+
 	return accumulate(ratings.begin(), ratings.end(), 0) / static_cast<int>(ratings.size());
 }
 

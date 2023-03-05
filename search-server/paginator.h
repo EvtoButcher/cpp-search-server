@@ -38,7 +38,7 @@ public:
     auto end() const;
 
     size_t size() const;
-    
+
 private:
     std::vector<IteratorRange<Iterator>> pages;
 };
@@ -78,4 +78,3 @@ inline size_t Paginator<Iterator>::size() const
 {
     return pages.size();
 }
-
