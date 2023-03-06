@@ -98,6 +98,9 @@ void SearchServer::RemoveDocument(int document_id)
 		documents_.erase(document_id);
 		for (const auto& [word, _] : word_freqs_in_document_.at(document_id)) {
 			word_to_document_freqs_.at(word).erase(document_id);
+			if (word_to_document_freqs_.at(word).empty()) {
+				word_to_document_freqs_.erase(word);
+			}
 		}
 		word_freqs_in_document_.erase(document_id);
 	}

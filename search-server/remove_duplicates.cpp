@@ -7,22 +7,19 @@ using namespace std;
 
 void RemoveDuplicates(SearchServer& search_server)
 {
-
     set<int> to_dell;
-    map<int, set<string>> words_docs;
-    
+    set<set<string>> words_docs;
+
     for (const int sample_document_id : search_server) {
+        set<string> words;
         for (const auto& [word, _] : search_server.GetWordFrequencies(sample_document_id)) {
-            words_docs[sample_document_id].insert(word);
+            words.insert(word);
         }
-    }
-    for (const int sample_document_id : search_server) {
-        int new_bound = sample_document_id;
-        for (auto iter_compared_document = words_docs.upper_bound(sample_document_id); iter_compared_document != words_docs.end(); iter_compared_document = words_docs.upper_bound(new_bound)) {
-            if (words_docs.at(sample_document_id) == words_docs.at((*iter_compared_document).first)) {
-                sample_document_id > (*iter_compared_document).first ? to_dell.insert(sample_document_id) : to_dell.insert((*iter_compared_document).first);
-            }
-            new_bound = (*iter_compared_document).first;
+        if (!binary_search(words_docs.begin(), words_docs.end(), words)) {
+            words_docs.insert(words);
+        }
+        else {
+            to_dell.insert(sample_document_id);
         }
     }
 
