@@ -13,7 +13,7 @@ void RemoveDuplicates(SearchServer& search_server)
     for (const int sample_document_id : search_server) {
         set<string> words;
         for (const auto& [word, _] : search_server.GetWordFrequencies(sample_document_id)) {
-            words.insert(word);
+            words.insert(static_cast<string>(word));
         }
         if (!binary_search(words_docs.begin(), words_docs.end(), words)) {
             words_docs.insert(words);
