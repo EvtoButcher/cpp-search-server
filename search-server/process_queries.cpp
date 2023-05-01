@@ -17,7 +17,7 @@ std::vector<Document> ProcessQueriesJoined(const SearchServer& search_server, co
     vector<Document> answer;
     answer.reserve(doc_list.size());
 
-    for (auto doc : doc_list) {
+    for (auto& doc : doc_list) {
         move(doc.begin(), doc.end(), back_inserter(answer));
     }
 

@@ -56,13 +56,7 @@ size_t SearchServer::GetDocumentCount() const
 
 tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(string_view raw_query, int document_id) const
 {
-	auto query = ParseQuery(raw_query);
-
-	sort(query.minus_words.begin(), query.minus_words.end());
-	query.minus_words.erase(unique(query.minus_words.begin(), query.minus_words.end()), query.minus_words.end());
-
-	sort(query.plus_words.begin(), query.plus_words.end());
-	query.plus_words.erase(unique(query.plus_words.begin(), query.plus_words.end()), query.plus_words.end());
+	auto query = ParseQuery(raw_query, true);
 
 	if (any_of(query.minus_words.begin(), query.minus_words.end(),
 		[&](string_view word) {
@@ -89,7 +83,7 @@ tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(const exe
 {
 	const auto query = ParseQuery(raw_query);
 
-	if (any_of(query.minus_words.begin(), query.minus_words.end(),
+	if (any_of(std::execution::par, query.minus_words.begin(), query.minus_words.end(),
 		[&](string_view word) {
 			return word_to_document_freqs_.count(word) != 0 && word_to_document_freqs_.at(word).count(document_id);
 		})) {
@@ -248,7 +242,7 @@ SearchServer::QueryWord SearchServer::ParseQueryWord(string_view text) const
 	return { word, is_minus, IsStopWord(word) };
 }
 
-SearchServer::Query SearchServer::ParseQuery(string_view text) const
+SearchServer::Query SearchServer::ParseQuery(string_view text, bool sort_result) const
 {
 	Query result;
 	for (string_view word : SplitIntoWordsView(text)) {
@@ -261,6 +255,14 @@ SearchServer::Query SearchServer::ParseQuery(string_view text) const
 				result.plus_words.push_back(query_word.data);
 			}
 		}
+	}
+
+	if (sort_result) {
+		sort(result.minus_words.begin(), result.minus_words.end());
+		result.minus_words.erase(unique(result.minus_words.begin(), result.minus_words.end()), result.minus_words.end());
+
+		sort(result.plus_words.begin(), result.plus_words.end());
+		result.plus_words.erase(unique(result.plus_words.begin(), result.plus_words.end()), result.plus_words.end());
 	}
 
 	return result;
